@@ -40,3 +40,4 @@ build/
 # Local build/debug artifacts
 *.log
 javac.*.args
+*.class
