@@ -9,7 +9,7 @@ Stages, simplified:
 4. Water map if water present.
 5. Atmospheric simulation for high/mid/low seazon depending on planet orientation, if atmosphere present.
 6. Surface impacts in atmosphere not present.
-7. Biomes calculations if live present and temperature windoq is good.
+7. Biomes calculations if live present and temperature window is good.
 8. Rivers generation if water and atmosphere present.
 9. Resources generation taking in account live, tecktonics, river basins, water bodies.
 10. Put result to DB.
