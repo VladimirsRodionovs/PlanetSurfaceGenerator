@@ -1,6 +1,7 @@
 Its an instrument for game development.
 Simulation of planetary formation from protoplanetary meterial to stable planet.
 Stages, simplified:
+
 0. Read Planet or Moon data from DB
 1. Tecktonic plates.
 2. Tecktonic stress to form mountains.
