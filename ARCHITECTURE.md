@@ -1,9 +1,9 @@
 # ARCHITECTURE — Planet Surface Generator
 
-## Назначение
-`planet-generator` создает процедурную поверхность планет/спутников: рельеф, климат, гидрологию, биомы и ресурсы. Результат сериализуется в compact HexData JSON и сохраняется в `PlanetsSurfaces2`.
+## Purpose
+`planet-generator` builds procedural surfaces for planets/moons: relief, climate, hydrology, biomes, and resources. Output is serialized to compact HexData JSON and stored in `PlanetsSurfaces2`.
 
-## Технологический стек
+## Tech stack
 - Java 17
 - Maven
 - JavaFX 21
@@ -11,80 +11,80 @@
 - HikariCP
 - Jackson
 
-## Режимы работы
-- UI: `org.planet.app.Main`
-- Batch: `org.planet.app.BatchMain`
+## Runtime modes
+- UI mode: `org.planet.app.Main`
+- Batch mode: `org.planet.app.BatchMain`
 
-## Высокоуровневый поток
-1. Загрузка объекта (планета/спутник) из `StarSystems`.
-2. Построение геометрии тайлов и соседств (икосаэдральная топология).
-3. Последовательный запуск generation pipeline (seeded, deterministic order).
-4. Расчет климата, воды, рек, биомов, ресурсов.
-5. Сериализация (`HexData`) и upsert в `PlanetsSurfaces2`.
+## High-level flow
+1. Load source object (planet/moon) from `StarSystems`.
+2. Build tile geometry and neighborhood graph (icosahedron topology).
+3. Run deterministic generation pipeline (seeded).
+4. Compute climate, water, rivers, biomes, resources.
+5. Serialize to HexData and upsert into `PlanetsSurfaces2`.
 
-## Слои
+## Layers
 ### 1) App / orchestration
-- Пакет: `org.planet.app`
-- Классы:
-  - `Main` — интерактивный запуск;
-  - `BatchMain` — пакетная генерация и dump-request сценарии.
+- Package: `org.planet.app`
+- Classes:
+  - `Main` — interactive flow;
+  - `BatchMain` — batch generation and dump-request workflow.
 
 ### 2) Service layer
-- Пакет: `org.planet.core.service`
-- Класс: `PlanetGenerationService`
-- Роль: координация full-cycle генерации и сохранения.
+- Package: `org.planet.core.service`
+- Class: `PlanetGenerationService`
+- Responsibility: full-cycle orchestration of generation + persistence.
 
 ### 3) Generation engine
-- Пакет: `org.planet.core.generation`
-- Ключевые элементы:
+- Package: `org.planet.core.generation`
+- Core elements:
   - `GenerationPipeline`, `StageId`, `GenerationStage`, `WorldContext`;
-  - профиль/настройки: `PlanetTuning`, `GeneratorSettings`;
-  - генераторы: climate, tectonics, erosion, lava, rivers, biomes, resources.
-- Stage-пакет: `org.planet.core.generation.stages`
-  - реализация шагов pipeline в фиксированном порядке.
+  - tuning/config: `PlanetTuning`, `GeneratorSettings`;
+  - generators: climate, tectonics, erosion, lava, rivers, biomes, resources.
+- Stages package: `org.planet.core.generation.stages`
+  - concrete pipeline steps in fixed order.
 
 ### 4) Topology / geometry
-- Пакет: `org.planet.core.topology`
-- Классы:
+- Package: `org.planet.core.topology`
+- Classes:
   - `IcosaNeighborsBuilder`, `NeighborGraphBuilder`
-- Роль: граф соседств и геометрическая основа для симуляций.
+- Responsibility: neighborhood graph and geometric substrate.
 
 ### 5) Data model
-- Пакеты: `org.planet.core.model`, `org.planet.core.model.config`
-- Сущности: `Tile`, `TectonicPlate`, `SurfaceType`, конфиги планеты/климата.
+- Packages: `org.planet.core.model`, `org.planet.core.model.config`
+- Entities: `Tile`, `TectonicPlate`, `SurfaceType`, planet/climate config.
 
 ### 6) DB layer
-- Пакет: `org.planet.core.db`
-- Ключевые классы:
+- Package: `org.planet.core.db`
+- Key classes:
   - `DataSourceFactory`, `LocalDbConfigLoader`, `DbConfig`;
-  - `StarSystemRepository` — чтение входных объектов;
-  - `PlanetSurfaceRepository` — запись результата;
-  - `PlanetConfigMapper`, `MoonTideResolver` — маппинг/доп.обогащение.
+  - `StarSystemRepository` — source object reads;
+  - `PlanetSurfaceRepository` — result writes;
+  - `PlanetConfigMapper`, `MoonTideResolver` — mapping/enrichment.
 
-### 7) IO/serialization
-- Пакет: `org.planet.core.io`
-- Классы: `HexDataEncoder`, `PlanetSurfaceSerializer`, `CsvTileLoader`, `TileSetSelector`.
+### 7) IO / serialization
+- Package: `org.planet.core.io`
+- Classes: `HexDataEncoder`, `PlanetSurfaceSerializer`, `CsvTileLoader`, `TileSetSelector`.
 
-## Pipeline (канонический порядок)
+## Pipeline (canonical order)
 `NEIGHBORS -> BASE_SURFACE -> PLATES -> STRESS -> OROGENESIS -> MOUNTAINS -> VOLCANISM -> CLIMATE -> WIND -> WATER_REBALANCE -> EROSION -> CLIMATE_RECALC -> IMPACTS -> ICE -> LAVA -> WATER_CLASSIFY -> RIVERS -> BIOMES -> RELIEF -> RESOURCES`
 
-## Хранилище и интеграции
-- Вход: MySQL `StarSystems` (астропараметры тел)
-- Выход: MySQL `PlanetsSurfaces2` (HexData и метаданные)
+## Storage and integrations
+- Input: MySQL `StarSystems` (astro parameters)
+- Output: MySQL `PlanetsSurfaces2` (HexData + metadata)
 - Upstream: `Starforge`
-- Downstream: `ExodusServer` / клиентская визуализация
+- Downstream: `ExodusServer` / client rendering
 
-## Точки расширения
-- Новый физический/экологический этап: добавить `GenerationStage` + включить в `GenerationPipeline`.
-- Новая модель ресурсов: расширить `ResourceGenerator` и схемы индексов.
-- Новый формат экспорта: добавить альтернативный сериализатор в `core/io`.
+## Extension points
+- New physical/ecological stage: add `GenerationStage` + include in `GenerationPipeline`.
+- New resource model: extend `ResourceGenerator` and index schemes.
+- New export format: add serializer in `core/io`.
 
-## Риски
-- Очень длинный pipeline: риск скрытых зависимостей между этапами.
-- Высокая вычислительная стоимость на больших батчах.
-- Требуется строгая совместимость HexData-контрактов при изменениях.
+## Risks
+- Long pipeline can hide inter-stage dependencies.
+- High compute cost on large batches.
+- HexData contract compatibility must be maintained across changes.
 
-## Быстрая навигация
+## Quick navigation
 - Entry points: `src/main/java/org/planet/app/Main.java`, `src/main/java/org/planet/app/BatchMain.java`
 - Pipeline core: `src/main/java/org/planet/core/generation/GenerationPipeline.java`
 - Stages: `src/main/java/org/planet/core/generation/stages/`
