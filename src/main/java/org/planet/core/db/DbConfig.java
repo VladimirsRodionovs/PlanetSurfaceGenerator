@@ -13,6 +13,21 @@ public class DbConfig {
     public int maxPoolSize = 10;
 
     public void applyOverridesFromSystem() {
+        jdbcUrl = pick(
+                System.getProperty("planet.db.url"),
+                System.getenv("PLANET_DB_URL"),
+                jdbcUrl
+        );
+        user = pick(
+                System.getProperty("planet.db.user"),
+                System.getenv("PLANET_DB_USER"),
+                user
+        );
+        password = pick(
+                System.getProperty("planet.db.password"),
+                System.getenv("PLANET_DB_PASSWORD"),
+                password
+        );
         starSystemsTable = pick(
                 System.getProperty("planet.db.table.starsystems"),
                 System.getenv("PLANET_DB_TABLE_STARSYSTEMS"),

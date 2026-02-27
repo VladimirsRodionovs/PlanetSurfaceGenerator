@@ -2,6 +2,7 @@ package org.planet.app;
 
 import org.planet.core.db.DataSourceFactory;
 import org.planet.core.db.DbConfig;
+import org.planet.core.db.LocalDbConfigLoader;
 import org.planet.core.db.MoonTideResolver;
 import org.planet.core.db.PlanetConfigMapper;
 import org.planet.core.db.PlanetSurfaceRepository;
@@ -246,7 +247,8 @@ public class BatchMain {
         DbConfig cfg = new DbConfig();
         cfg.jdbcUrl = "jdbc:mysql://localhost:3306/EXOLOG";
         cfg.user = "ghost_reg";
-        cfg.password = "REDACTED_DB_PASSWORD";
+        cfg.password = "";
+        LocalDbConfigLoader.apply(cfg);
         cfg.applyOverridesFromSystem();
 
         cfg.jdbcUrl = pick(findOptionValue(args, "--db-url"), cfg.jdbcUrl);

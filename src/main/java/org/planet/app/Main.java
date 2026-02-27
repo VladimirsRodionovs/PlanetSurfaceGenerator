@@ -33,6 +33,7 @@ import org.planet.core.generation.WorldType;
 import org.planet.core.generation.PlanetTuning;
 import org.planet.core.db.DataSourceFactory;
 import org.planet.core.db.DbConfig;
+import org.planet.core.db.LocalDbConfigLoader;
 import org.planet.core.db.MoonTideResolver;
 import org.planet.core.db.PlanetConfigMapper;
 import org.planet.core.db.PlanetSurfaceRepository;
@@ -138,11 +139,12 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        // 0) База данных (пока хардкод для отладки)
+        // 0) База данных
         DbConfig cfg = new DbConfig();
         cfg.jdbcUrl = "jdbc:mysql://localhost:3306/EXOLOG";
         cfg.user = "ghost_reg";
-        cfg.password = "REDACTED_DB_PASSWORD";
+        cfg.password = "";
+        LocalDbConfigLoader.apply(cfg);
         cfg.applyOverridesFromSystem();
         DataSource ds = DataSourceFactory.create(cfg);
 

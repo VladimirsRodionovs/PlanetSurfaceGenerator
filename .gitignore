@@ -21,6 +21,7 @@ buildNumber.properties
 javac.*.args
 *.class
 .kotlin
+local/db.local.properties
 
 # IntelliJ IDEA
 .idea/modules.xml
